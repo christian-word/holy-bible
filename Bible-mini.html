@@ -5,110 +5,445 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Біблія — пошук та навігація</title>
   <style>
-    body{font-family:Inter,Arial,sans-serif;line-height:1.4;padding:20px;max-width:900px;margin:0 auto;color:#111}
-    h1{font-size:20px;margin:0 0 12px}
-    .note{color:#666;font-size:13px;margin-bottom:12px}
-    .row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-    input[type="search"], select{flex:1;padding:8px 10px;font-size:15px;border:1px solid #ccc;border-radius:6px}
-    button{padding:8px 10px;border-radius:6px;border:1px solid #bbb;background:#f5f5f5;cursor:pointer}
-    #results, #verseDisplay{margin-top:14px}
-    .res{padding:8px;border-bottom:1px solid #eee}
-    .ref{font-weight:600;margin-bottom:6px}
-    .text{white-space:pre-wrap}
-    .small{font-size:13px;color:#666}
-    mark{background:yellow;padding:0}
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --text-color: #333;
+      --light-gray: #f5f5f5;
+      --border-color: #ddd;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      padding: 10px;
+      max-width: 900px;
+      margin: 0 auto;
+      color: var(--text-color);
+      background-color: #fff;
+    }
+    
+    h1 {
+      font-size: 1.4rem;
+      margin: 0 0 12px;
+      color: var(--primary-color);
+    }
+    
+    .note {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+    
+    .search-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .nav-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .chapter-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 15px 0;
+    }
+    
+    input[type="search"] {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 12px;
+      font-size: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: #fff;
+    }
+    
+    select {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 12px;
+      font-size: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: #fff;
+    }
+    
+    button {
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--light-gray);
+      cursor: pointer;
+      font-size: 1rem;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    
+    button:hover {
+      background: #e0e0e0;
+    }
+    
+    button.primary {
+      background: var(--secondary-color);
+      color: white;
+      border-color: var(--secondary-color);
+    }
+    
+    button.primary:hover {
+      background: #2980b9;
+    }
+    
+    button.nav-arrow {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 18px;
+    }
+    
+    button.nav-arrow:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+    
+    #results, #chapterDisplay {
+      margin-top: 14px;
+    }
+    
+    .res {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .ref {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--primary-color);
+    }
+    
+    .text {
+      white-space: pre-wrap;
+    }
+    
+    .small {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .chapter-text {
+      margin-top: 15px;
+      line-height: 1.8;
+      font-size: 1.15rem;
+    }
+    
+    .verse {
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .verse:last-child {
+      border-bottom: none;
+    }
+    
+    .verse-num {
+      font-size: 0.85em;
+      color: var(--secondary-color);
+      font-weight: bold;
+      margin-right: 6px;
+    }
+    
+    .verse-text {
+      display: inline;
+      font-weight: 500;
+    }
+    
+    .chapter-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 0 15px;
+      color: var(--primary-color);
+      text-align: center;
+      flex-grow: 1;
+    }
+    
+    @media (max-width: 600px) {
+      body {
+        padding: 8px;
+      }
+      
+      .nav-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      input[type="search"], select {
+        width: 100%;
+      }
+      
+      button {
+        width: auto;
+      }
+      
+      .chapter-text {
+        font-size: 1.1rem;
+        line-height: 1.7;
+      }
+      
+      .verse {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+      }
+      
+      button.nav-arrow {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+    }
   </style>
 </head>
 <body>
   <h1>Біблія — пошук та навігація</h1>
-  <div class="note">Текст завантажується через зовнішній скрипт. Можна шукати слова або обирати книгу, главу та вірш.</div>
+  <div class="note">Текст завантажується автоматично. Можна шукати слова або обирати книгу та главу.</div>
 
   <!-- Підключення API -->
   <script src="https://christian-word.github.io/bible-engine/bible-API.js"></script>
 
   <!-- Пошук -->
-  <div class="row">
+  <div class="search-row">
     <input id="q" type="search" placeholder="Пошук по тексту..." autocomplete="off" />
-    <button id="btn">Знайти</button>
+    <button id="searchBtn" class="primary">Знайти</button>
   </div>
-  <div id="status" class="small">Ініціалізація...</div>
-  <div id="results"></div>
+  <div class="row">
+    <button id="backBtn" class="hidden">← Назад до навігації</button>
+  </div>
+  <div id="status" class="small">Завантаження Біблії...</div>
+  <div id="results" class="hidden"></div>
 
   <hr>
 
   <!-- Навігація по книгах -->
-  <div class="row">
-    <select id="bookSelect"><option value="">Оберіть книгу</option></select>
-    <select id="chapterSelect"><option value="">Глава</option></select>
-    <select id="verseSelect"><option value="">Вірш</option></select>
+  <div id="navigation">
+    <div class="nav-row">
+      <select id="bookSelect"><option value="">Оберіть книгу</option></select>
+      <select id="chapterSelect"><option value="">Глава</option></select>
+    </div>
+    
+    <div class="chapter-nav hidden" id="chapterNav">
+      <button id="prevChapter" class="nav-arrow" title="Попередня глава">←</button>
+      <div id="currentChapter" class="chapter-title"></div>
+      <button id="nextChapter" class="nav-arrow" title="Наступна глава">→</button>
+    </div>
+    
+    <div id="chapterDisplay" class="chapter-text"></div>
   </div>
-  <div id="verseDisplay" class="text"></div>
 
   <script>
     const qEl = document.getElementById('q');
-    const btn = document.getElementById('btn');
+    const searchBtn = document.getElementById('searchBtn');
+    const backBtn = document.getElementById('backBtn');
     const resultsEl = document.getElementById('results');
     const statusEl = document.getElementById('status');
     const bookSelect = document.getElementById('bookSelect');
     const chapterSelect = document.getElementById('chapterSelect');
-    const verseSelect = document.getElementById('verseSelect');
-    const verseDisplay = document.getElementById('verseDisplay');
+    const chapterDisplay = document.getElementById('chapterDisplay');
+    const navigationEl = document.getElementById('navigation');
+    const chapterNav = document.getElementById('chapterNav');
+    const prevChapterBtn = document.getElementById('prevChapter');
+    const nextChapterBtn = document.getElementById('nextChapter');
+    const currentChapterTitle = document.getElementById('currentChapter');
 
-    function setStatus(t){ statusEl.textContent = t; }
+    let currentBook = null;
+    let currentChapter = null;
+    let maxChapters = 0;
 
-    function highlight(text, query) {
-      if (!query) return text;
-      const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const re = new RegExp(safeQuery, 'gi');
-      return text.replace(re, match => `<mark>${match}</mark>`);
+    function setStatus(t) { statusEl.textContent = t; }
+
+    // Создаем экземпляр BibleAPI вручную
+    const bible = new BibleAPIClass();
+    window.bible = bible; // Делаем глобально доступным
+
+    // Форматирование главы с куплетами
+    async function formatChapterVerses(bookNum, chapterNum) {
+      try {
+        const verses = await bible.getVerses(bookNum, chapterNum);
+        if (!verses || !verses.length) return '<div class="verse">Глава пуста</div>';
+        
+        let html = '';
+        verses.forEach(verse => {
+          html += `
+            <div class="verse">
+              <span class="verse-num">${verse.number}</span>
+              <span class="verse-text">${verse.text}</span>
+            </div>
+          `;
+        });
+        return html;
+      } catch (e) {
+        console.error(e);
+        return '<div class="verse">Помилка завантаження</div>';
+      }
     }
 
-    async function doSearch(){
+    async function showSearchResults() {
       const q = qEl.value.trim();
       resultsEl.innerHTML = '';
-      if (!q) { setStatus('Введіть запит.'); return; }
-      setStatus('Пошук...');
-      try{
-        if (!window.bible) throw new Error('Bible API не знайдено.');
-        await window.bible.ready();
-        const items = await window.bible.search(q);
-        if (!items || !items.length){ setStatus('Нічого не знайдено.'); return; }
+      if (!q) { setStatus('Введіть запит для пошуку.'); return; }
+      
+      setStatus('Шукаємо...');
+      try {
+        await bible.ready();
+        const items = await bible.search(q);
+        
+        if (!items || !items.length) { 
+          setStatus('Нічого не знайдено.'); 
+          return; 
+        }
+        
         setStatus(`Знайдено ${items.length} збігів`);
+        
         const frag = document.createDocumentFragment();
-        for (let it of items){
-          const wrap = document.createElement('div'); wrap.className='res';
-          const ref = document.createElement('div'); ref.className='ref';
+        for (let it of items) {
+          const wrap = document.createElement('div'); 
+          wrap.className = 'res';
+          
+          const ref = document.createElement('div'); 
+          ref.className = 'ref';
           ref.textContent = `${it.book} ${it.chapter}:${it.verse}`;
-          const txt = document.createElement('div'); txt.className='text';
-          txt.innerHTML = highlight(it.text, q);
-          wrap.appendChild(ref); wrap.appendChild(txt);
+          
+          const txt = document.createElement('div'); 
+          txt.className = 'text'; 
+          txt.textContent = it.text;
+          
+          wrap.appendChild(ref); 
+          wrap.appendChild(txt);
           frag.appendChild(wrap);
         }
+        
         resultsEl.appendChild(frag);
-      }catch(e){
+        resultsEl.classList.remove('hidden');
+        navigationEl.classList.add('hidden');
+        backBtn.classList.remove('hidden');
+        qEl.blur(); // Скрываем клавиатуру на мобильных
+      } catch (e) {
         console.error(e);
         setStatus('Помилка: ' + (e?.message || String(e)));
       }
     }
 
-    btn.addEventListener('click', doSearch);
-    qEl.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+    function showNavigation() {
+      resultsEl.classList.add('hidden');
+      navigationEl.classList.remove('hidden');
+      backBtn.classList.add('hidden');
+      setStatus('Готово. Можна шукати або обрати книгу.');
+      qEl.value = ''; // Очищаем поле поиска
+      qEl.focus(); // Фокусируемся на поле поиска
+    }
 
-    async function initBooks(){
-      try{
-        if (!window.bible) { setStatus('Bible API не знайдено.'); return; }
-        setStatus('Завантаження тексту Біблії...');
-        await window.bible.ready();
+    async function updateChapterNavigation() {
+      if (!currentBook || !currentChapter) return;
+      
+      const book = (await bible.getBooks()).find(b => b.number === currentBook);
+      currentChapterTitle.textContent = `${book.name} ${currentChapter}`;
+      
+      // Обновляем состояние кнопок
+      prevChapterBtn.disabled = currentChapter <= 1;
+      nextChapterBtn.disabled = currentChapter >= maxChapters;
+    }
+
+    async function showChapter(bookNum, chapterNum) {
+      if (!bookNum || !chapterNum) {
+        chapterDisplay.innerHTML = '';
+        chapterNav.classList.add('hidden');
+        return;
+      }
+      
+      try {
+        setStatus('Завантаження глави...');
+        currentBook = bookNum;
+        currentChapter = parseInt(chapterNum, 10);
+        
+        const chapters = await bible.getChapters(bookNum);
+        maxChapters = chapters.length;
+        
+        const versesHtml = await formatChapterVerses(bookNum, chapterNum);
+        chapterDisplay.innerHTML = versesHtml;
+        
+        chapterNav.classList.remove('hidden');
+        await updateChapterNavigation();
+        
+        setStatus(`Завантажено: ${currentChapterTitle.textContent}`);
+        
+        // Прокручиваем к началу главы
+        chapterDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (e) {
+        console.error(e);
+        chapterDisplay.innerHTML = '<div class="verse">Помилка завантаження глави</div>';
+        setStatus('Помилка завантаження');
+      }
+    }
+
+    async function navigateToPrevChapter() {
+      if (currentChapter > 1) {
+        const newChapter = currentChapter - 1;
+        chapterSelect.value = newChapter;
+        await showChapter(currentBook, newChapter);
+      }
+    }
+
+    async function navigateToNextChapter() {
+      if (currentChapter < maxChapters) {
+        const newChapter = currentChapter + 1;
+        chapterSelect.value = newChapter;
+        await showChapter(currentBook, newChapter);
+      }
+    }
+
+    searchBtn.addEventListener('click', showSearchResults);
+    backBtn.addEventListener('click', showNavigation);
+    prevChapterBtn.addEventListener('click', navigateToPrevChapter);
+    nextChapterBtn.addEventListener('click', navigateToNextChapter);
+    
+    qEl.addEventListener('keydown', e => { 
+      if (e.key === 'Enter') showSearchResults(); 
+    });
+
+    async function initBooks() {
+      try {
+        setStatus('Завантаження списку книг...');
+        await bible.ready();
         setStatus('Готово. Можна шукати або обрати книгу.');
 
-        const books = await window.bible.getBooks();
-        books.forEach((b, idx) => {
+        const books = await bible.getBooks();
+        bookSelect.innerHTML = '<option value="">Оберіть книгу</option>';
+        books.forEach((b) => {
           const opt = document.createElement('option');
-          opt.value = idx+1;
-          opt.textContent = b;
+          opt.value = b.number;
+          opt.textContent = b.name;
           bookSelect.appendChild(opt);
         });
-      }catch(err){
+      } catch (err) {
         console.error(err);
         setStatus('Не вдалося завантажити: ' + (err?.message || String(err)));
       }
@@ -116,44 +451,38 @@
 
     bookSelect.addEventListener('change', async () => {
       chapterSelect.innerHTML = '<option value="">Глава</option>';
-      verseSelect.innerHTML = '<option value="">Вірш</option>';
-      verseDisplay.textContent = '';
+      chapterDisplay.innerHTML = '';
+      chapterNav.classList.add('hidden');
+      
       const bookNum = bookSelect.value;
       if (!bookNum) return;
-      const chapters = await window.bible.getChapters(bookNum);
-      chapters.forEach((ch, idx) => {
-        const opt = document.createElement('option');
-        opt.value = idx+1;
-        opt.textContent = idx+1;
-        chapterSelect.appendChild(opt);
-      });
+      
+      try {
+        setStatus('Завантаження списку глав...');
+        const chapters = await bible.getChapters(bookNum);
+        chapters.forEach((ch) => {
+          const opt = document.createElement('option');
+          opt.value = ch;
+          opt.textContent = `Глава ${ch}`;
+          chapterSelect.appendChild(opt);
+        });
+        setStatus('Оберіть главу');
+      } catch (e) {
+        console.error(e);
+        setStatus('Помилка завантаження глав');
+      }
     });
 
     chapterSelect.addEventListener('change', async () => {
-      verseSelect.innerHTML = '<option value="">Вірш</option>';
-      verseDisplay.textContent = '';
-      const bookNum = bookSelect.value;
-      const chapterNum = chapterSelect.value;
-      if (!bookNum || !chapterNum) return;
-      const verses = await window.bible.getVerses(bookNum, chapterNum);
-      verses.forEach((v, idx) => {
-        const opt = document.createElement('option');
-        opt.value = idx+1;
-        opt.textContent = idx+1;
-        verseSelect.appendChild(opt);
-      });
+      await showChapter(bookSelect.value, chapterSelect.value);
     });
 
-    verseSelect.addEventListener('change', async () => {
-      const bookNum = bookSelect.value;
-      const chapterNum = chapterSelect.value;
-      const verseNum = verseSelect.value;
-      if (!bookNum || !chapterNum || !verseNum) return;
-      const verseText = await window.bible.getVerse(bookNum, chapterNum, verseNum);
-      verseDisplay.textContent = verseText;
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+      initBooks();
+      // Фокус на поле поиска для мобильных устройств
+      setTimeout(() => qEl.focus(), 300);
     });
-
-    initBooks();
   </script>
 </body>
 </html>
