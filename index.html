@@ -1,0 +1,268 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Святе Письмо - Читання Біблії онлайн</title>
+    <style>
+        :root {
+            --primary-color: #3a5a78;
+            --secondary-color: #8b4513;
+            --accent-color: #d4a76a;
+            --light-color: #f5f5f5;
+            --dark-color: #333;
+        }
+        
+        body {
+            font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f6ee;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .tagline {
+            font-style: italic;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .versions {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 3rem 0;
+        }
+        
+        .version-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            width: 320px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            border-top: 4px solid var(--accent-color);
+        }
+        
+        .version-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .version-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .version-title {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .version-body {
+            padding: 1.5rem;
+            min-height: 200px;
+        }
+        
+        .features {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .features li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .features li:before {
+            content: "✓";
+            color: var(--accent-color);
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--accent-color);
+            color: var(--dark-color);
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            background: #c0955a;
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .btn-outline:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .version-footer {
+            padding: 1rem;
+            background: #f5f5f5;
+            text-align: center;
+        }
+        
+        footer {
+            background: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        .scripture {
+            margin: 4rem 0;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            font-style: italic;
+            position: relative;
+        }
+        
+        .scripture:before {
+            content: """;
+            position: absolute;
+            left: 1rem;
+            top: 0.5rem;
+            font-size: 3rem;
+            color: var(--accent-color);
+            line-height: 1;
+            opacity: 0.3;
+        }
+        
+        .scripture-text {
+            padding-left: 2rem;
+        }
+        
+        .scripture-ref {
+            text-align: right;
+            font-weight: bold;
+            font-style: normal;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .versions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .version-card {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Святе Письмо</div>
+        <div class="tagline">Слово Твоє - світильник нозі моїй і світло стежці моїй (Псалом 118:105)</div>
+    </header>
+    
+  
+    <div class="container">
+        <h2 class="text-center">Оберіть версію для читання</h2>
+        <p class="text-center">Почніть свою духовну подорож з зручним для вас інтерфейсом</p>
+        
+        <div class="versions">
+            <div class="version-card">
+                <div class="version-header">
+                    <h3 class="version-title">Проста версія</h3>
+                    <p>Мінімалістичний та чистий інтерфейс</p>
+                </div>
+                <div class="version-body">
+                    <ul class="features">
+                        <li>Читання Святого Письма</li>
+                        <li>Швидкий доступ до книг Біблії</li>
+                        <li>Пошук за розділами</li>
+                        <li>Адаптивний дизайн</li>
+                        <li>Без відволікаючих елементів</li>
+                    </ul>
+                </div>
+                <div class="version-footer">
+                    <a href="#" class="btn">Відкрити просту версію</a>
+                </div>
+            </div>
+            
+<div class="version-card">
+    <div class="version-header" style="background: var(--secondary-color);">
+        <h3 class="version-title">Розширена версія</h3>
+        <p>Покращений інтерфейс для глибокого вивчення Біблії</p>
+    </div>
+    <div class="version-body">
+        <ul class="features">
+            <li>Повнотекстовий пошук по Біблії</li>
+            <li>Система закладок для улюблених віршів</li>
+            <li>Можливість копіювання віршів</li>
+            <li>Налаштування шрифту (розмір, інтервал)</li>
+            <li>Темний/світлий режим</li>
+            <li>Збереження прогресу читання</li>
+            <li>Швидкий доступ до останнього розділу</li>
+            <li>Інтуїтивна навігація по книгах і розділах</li>
+        </ul>
+    </div>
+    <div class="version-footer">
+        <a href="#" class="btn">Відкрити розширену версію</a>
+    </div>
+</div>
+        
+        <div class="scripture">
+            <div class="scripture-text">
+                Бо Слово Боже живе й діє, воно гостріше за всякий меч дворізаний: воно проникає аж до поділу душі й духа, суглобів і мозку, і розсудує думки й наміри серця.
+            </div>
+            <div class="scripture-ref">Євреїв 4:12</div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2025 Біблія онлайн</p>
+        <p>Церква ЄХБ "Дім Євангелія", м. Суми</p>
+        <p>Всі права захищені. Використовуються переклади Біблії, дозволені для публічного читання.</p>
+    </footer>
+</body>
+</html>
