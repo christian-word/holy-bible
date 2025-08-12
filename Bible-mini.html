@@ -306,51 +306,56 @@
       }
     }
 
-    async function showSearchResults() {
-      const q = qEl.value.trim();
-      resultsEl.innerHTML = '';
-      if (!q) { setStatus('Введіть запит для пошуку.'); return; }
-      
-      setStatus('Шукаємо...');
-      try {
-        await bible.ready();
-        const items = await bible.search(q);
-        
-        if (!items || !items.length) { 
-          setStatus('Нічого не знайдено.'); 
-          return; 
-        }
-        
-        setStatus(`Знайдено ${items.length} збігів`);
-        
-        const frag = document.createDocumentFragment();
-        for (let it of items) {
-          const wrap = document.createElement('div'); 
-          wrap.className = 'res';
-          
-          const ref = document.createElement('div'); 
-          ref.className = 'ref';
-          ref.textContent = `${it.book} ${it.chapter}:${it.verse}`;
-          
-          const txt = document.createElement('div'); 
-          txt.className = 'text'; 
-          txt.textContent = it.text;
-          
-          wrap.appendChild(ref); 
-          wrap.appendChild(txt);
-          frag.appendChild(wrap);
-        }
-        
-        resultsEl.appendChild(frag);
-        resultsEl.classList.remove('hidden');
-        navigationEl.classList.add('hidden');
-        backBtn.classList.remove('hidden');
-        qEl.blur(); // Скрываем клавиатуру на мобильных
-      } catch (e) {
-        console.error(e);
-        setStatus('Помилка: ' + (e?.message || String(e)));
-      }
+async function showSearchResults() {
+  const q = qEl.value.trim();
+  resultsEl.innerHTML = '';
+  if (!q) { setStatus('Введіть запит для пошуку.'); return; }
+  
+  setStatus('Шукаємо...');
+  try {
+    await bible.ready();
+    const items = await bible.search(q);
+    
+    if (!items || !items.length) { 
+      setStatus('Нічого не знайдено.'); 
+      return; 
     }
+    
+    setStatus(`Знайдено ${items.length} збігів`);
+    
+    // Создаём регулярное выражение для поиска без учёта регистра
+    const regex = new RegExp(`(${q})`, 'gi');
+
+    const frag = document.createDocumentFragment();
+    for (let it of items) {
+      const wrap = document.createElement('div'); 
+      wrap.className = 'res';
+      
+      const ref = document.createElement('div'); 
+      ref.className = 'ref';
+      ref.textContent = `${it.book} ${it.chapter}:${it.verse}`;
+      
+      const txt = document.createElement('div'); 
+      txt.className = 'text'; 
+      // Подсветка найденного слова
+      txt.innerHTML = it.text.replace(regex, `<mark style="background-color: yellow;">$1</mark>`);
+      
+      wrap.appendChild(ref); 
+      wrap.appendChild(txt);
+      frag.appendChild(wrap);
+    }
+    
+    resultsEl.appendChild(frag);
+    resultsEl.classList.remove('hidden');
+    navigationEl.classList.add('hidden');
+    backBtn.classList.remove('hidden');
+    qEl.blur();
+  } catch (e) {
+    console.error(e);
+    setStatus('Помилка: ' + (e?.message || String(e)));
+  }
+}
+
 
     function showNavigation() {
       resultsEl.classList.add('hidden');
