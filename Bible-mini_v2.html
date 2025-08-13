@@ -1,0 +1,1049 @@
+﻿<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Біблія — пошук та навігація</title>
+<style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --text-color: #333;
+      --light-gray: #f5f5f5;
+      --border-color: #ddd;
+      --background-color: #fff;
+      --card-background: #fff;
+      --hover-color: #e0e0e0;
+      --bookmark-color: #f39c12;
+      --bookmark-active: #e67e22;
+    }
+
+    [data-theme="dark"] {
+      --primary-color: #ecf0f1;
+      --secondary-color: #3498db;
+      --text-color: #ecf0f1;
+      --light-gray: #34495e;
+      --border-color: #555;
+      --background-color: #2c3e50;
+      --card-background: #34495e;
+      --hover-color: #4a5f7a;
+      --bookmark-color: #f39c12;
+      --bookmark-active: #e67e22;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      padding: 10px;
+      max-width: 900px;
+      margin: 0 auto;
+      color: var(--text-color);
+      background-color: var(--background-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+    
+    h1 {
+      font-size: 1.4rem;
+      margin: 0 0 12px;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border-color);
+      background: var(--card-background);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: var(--hover-color);
+    }
+
+    .icon-btn.active {
+      background: var(--secondary-color);
+      color: white;
+      border-color: var(--secondary-color);
+    }
+    
+    .note {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+    
+    .search-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .nav-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .chapter-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 15px 0;
+    }
+    
+    input[type="search"] {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 12px;
+      font-size: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--card-background);
+      color: var(--text-color);
+    }
+    
+    select {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 12px;
+      font-size: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--card-background);
+      color: var(--text-color);
+    }
+    
+    button {
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--light-gray);
+      color: var(--text-color);
+      cursor: pointer;
+      font-size: 1rem;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    
+    button:hover {
+      background: var(--hover-color);
+    }
+    
+    button.primary {
+      background: var(--secondary-color);
+      color: white;
+      border-color: var(--secondary-color);
+    }
+    
+    button.primary:hover {
+      background: #2980b9;
+    }
+    
+    button.nav-arrow {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 18px;
+    }
+    
+    button.nav-arrow:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .bookmarks-panel {
+      background: var(--card-background);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 15px;
+      padding: 15px;
+      display: none;
+    }
+
+    .bookmarks-panel.show {
+      display: block;
+    }
+
+    .bookmarks-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .bookmarks-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .bookmark-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+    }
+
+    .bookmark-item:last-child {
+      border-bottom: none;
+    }
+
+    .bookmark-item:hover {
+      background: var(--hover-color);
+      margin: 0 -8px;
+      padding: 8px;
+      border-radius: 4px;
+    }
+
+    .bookmark-ref {
+      font-weight: 600;
+      color: var(--secondary-color);
+    }
+
+    .bookmark-text {
+      font-size: 0.9rem;
+      color: var(--text-color);
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    .bookmark-delete {
+      color: #e74c3c;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .bookmark-delete:hover {
+      background: #fee;
+    }
+    
+    #results, #chapterDisplay {
+      margin-top: 14px;
+    }
+    
+    .res {
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--card-background);
+      position: relative;
+    }
+    
+    .ref {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--primary-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bookmark-btn {
+      color: var(--bookmark-color);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .bookmark-btn:hover {
+      background: rgba(243, 156, 18, 0.1);
+    }
+
+    .bookmark-btn.bookmarked {
+      color: var(--bookmark-active);
+    }
+    
+    .text {
+      white-space: pre-wrap;
+    }
+    
+    .small {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .chapter-text {
+      margin-top: 15px;
+      line-height: 1.8;
+      font-size: 1.15rem;
+    }
+    
+    .verse {
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #f0f0f0;
+      position: relative;
+    }
+
+    [data-theme="dark"] .verse {
+      border-bottom-color: #555;
+    }
+    
+    .verse:last-child {
+      border-bottom: none;
+    }
+
+    .verse:hover .verse-bookmark {
+      opacity: 1;
+    }
+
+    .verse-bookmark {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .verse-num {
+      font-size: 0.85em;
+      color: var(--secondary-color);
+      font-weight: bold;
+      margin-right: 6px;
+    }
+    
+    .verse-text {
+      display: inline;
+      font-weight: 500;
+    }
+    
+    .chapter-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 0 15px;
+      color: var(--primary-color);
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    /* Режим чтения */
+    .reading-mode {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .reading-mode .search-row,
+    .reading-mode .nav-row,
+    .reading-mode .chapter-nav,
+    .reading-mode #navigation > .nav-row,
+    .reading-mode #navigation > .chapter-nav,
+    .reading-mode #results,
+    .reading-mode .bookmarks-panel,
+    .reading-mode .note,
+    .reading-mode hr {
+      display: none !important;
+    }
+
+    .reading-mode #navigation {
+      display: block !important;
+    }
+
+    .reading-mode #chapterDisplay {
+      display: block !important;
+    }
+
+    .reading-mode .chapter-text {
+      font-size: 1.3rem;
+      line-height: 2;
+      margin-top: 0;
+    }
+
+    .reading-mode .verse {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .reading-mode h1 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 40px;
+    }
+
+    .reading-mode-exit {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: var(--secondary-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+    }
+
+    .reading-mode-exit:hover {
+      transform: scale(1.1);
+    }
+    
+    @media (max-width: 600px) {
+      body {
+        padding: 8px;
+      }
+      
+      .nav-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      h1 {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .controls {
+        align-self: stretch;
+        justify-content: center;
+      }
+      
+      input[type="search"], select {
+        width: 100%;
+      }
+      
+      button {
+        width: auto;
+      }
+      
+      .chapter-text {
+        font-size: 1.1rem;
+        line-height: 1.7;
+      }
+      
+      .verse {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+      }
+      
+      button.nav-arrow {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+      }
+
+      .reading-mode {
+        padding: 20px 15px;
+      }
+
+      .reading-mode .chapter-text {
+        font-size: 1.2rem;
+        line-height: 1.8;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    <span>Біблія — пошук та навігація</span>
+    <div class="controls">
+      <button class="icon-btn" id="themeToggle" title="Переключити тему">🌙</button>
+      <button class="icon-btn" id="bookmarksToggle" title="Закладки">📚</button>
+      <button class="icon-btn" id="readingModeToggle" title="Режим читання">📖</button>
+    </div>
+  </h1>
+
+  <div class="bookmarks-panel" id="bookmarksPanel">
+    <div class="bookmarks-header">
+      <span>Закладки</span>
+      <button id="clearBookmarks" style="font-size: 0.8rem; padding: 4px 8px;">Очистити всі</button>
+    </div>
+    <div class="bookmarks-list" id="bookmarksList">
+      <div style="text-align: center; color: #666; padding: 20px;">Немає закладок</div>
+    </div>
+  </div>
+
+  <div class="note">Текст завантажується автоматично. Можна шукати слова або обрати книгу та главу.</div>
+
+  <!-- Підключення API -->
+  <script src="https://christian-word.github.io/bible-engine/bible-API.js"></script>
+
+  <!-- Пошук -->
+  <div class="search-row">
+    <input id="q" type="search" placeholder="Пошук по тексту..." autocomplete="off" />
+    <button id="searchBtn" class="primary">Знайти</button>
+  </div>
+  <div class="row">
+    <button id="backBtn" class="hidden">← Назад до навігації</button>
+  </div>
+  <div id="status" class="small">Завантаження Біблії...</div>
+  <div id="results" class="hidden"></div>
+
+  <hr>
+
+  <!-- Навігація по книгам -->
+  <div id="navigation">
+    <div class="nav-row">
+      <select id="bookSelect"><option value="">Оберіть книгу</option></select>
+      <select id="chapterSelect"><option value="">Глава</option></select>
+    </div>
+    
+    <div class="chapter-nav hidden" id="chapterNav">
+      <button id="prevChapter" class="nav-arrow" title="Попередня глава">←</button>
+      <div id="currentChapter" class="chapter-title"></div>
+      <button id="nextChapter" class="nav-arrow" title="Наступна глава">→</button>
+    </div>
+    
+    <div id="chapterDisplay" class="chapter-text"></div>
+  </div>
+
+  <button class="reading-mode-exit hidden" id="readingModeExit">✕</button>
+
+  <script>
+const qEl = document.getElementById('q');
+const searchBtn = document.getElementById('searchBtn');
+const backBtn = document.getElementById('backBtn');
+const resultsEl = document.getElementById('results');
+const statusEl = document.getElementById('status');
+const bookSelect = document.getElementById('bookSelect');
+const chapterSelect = document.getElementById('chapterSelect');
+const chapterDisplay = document.getElementById('chapterDisplay');
+const navigationEl = document.getElementById('navigation');
+const chapterNav = document.getElementById('chapterNav');
+const prevChapterBtn = document.getElementById('prevChapter');
+const nextChapterBtn = document.getElementById('nextChapter');
+const currentChapterTitle = document.getElementById('currentChapter');
+
+// Новые элементы
+const themeToggle = document.getElementById('themeToggle');
+const bookmarksToggle = document.getElementById('bookmarksToggle');
+const readingModeToggle = document.getElementById('readingModeToggle');
+const readingModeExit = document.getElementById('readingModeExit');
+const bookmarksPanel = document.getElementById('bookmarksPanel');
+const bookmarksList = document.getElementById('bookmarksList');
+const clearBookmarks = document.getElementById('clearBookmarks');
+
+let currentBook = null;
+let currentChapter = null;
+let maxChapters = 0;
+let bookmarks = [];
+let isDarkTheme = false;
+let isReadingMode = false;
+
+// Ключи для localStorage
+const STORAGE_KEYS = {
+  BOOKMARKS: 'bible_bookmarks',
+  THEME: 'bible_theme',
+  READING_MODE: 'bible_reading_mode'
+};
+
+function setStatus(t) { statusEl.textContent = t; }
+
+// Создаем экземпляр BibleAPI вручную
+const bible = new BibleAPIClass();
+window.bible = bible; // Делаем глобально доступным
+
+// === ИСПРАВЛЕННАЯ СИСТЕМА ЗАКЛАДОК ===
+function loadBookmarks() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.BOOKMARKS);
+    if (saved) {
+      bookmarks = JSON.parse(saved);
+    } else {
+      bookmarks = [];
+    }
+  } catch (e) {
+    console.error('Ошибка загрузки закладок:', e);
+    bookmarks = [];
+  }
+  return bookmarks;
+}
+
+function saveBookmarks() {
+  try {
+    localStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(bookmarks));
+    updateBookmarksDisplay();
+  } catch (e) {
+    console.error('Ошибка сохранения закладок:', e);
+  }
+}
+
+function addBookmark(book, chapter, verse, text) {
+  const bookmark = {
+    id: Date.now(),
+    book: book,
+    chapter: parseInt(chapter),
+    verse: parseInt(verse),
+    text: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
+    fullRef: `${book} ${chapter}:${verse}`
+  };
+  
+  // Проверяем, нет ли уже такой закладки
+  const exists = bookmarks.find(b => 
+    b.book === book && b.chapter === parseInt(chapter) && b.verse === parseInt(verse)
+  );
+  
+  if (!exists) {
+    bookmarks.push(bookmark);
+    saveBookmarks();
+    return true;
+  }
+  return false;
+}
+
+function removeBookmark(book, chapter, verse) {
+  bookmarks = bookmarks.filter(b => 
+    !(b.book === book && b.chapter === parseInt(chapter) && b.verse === parseInt(verse))
+  );
+  saveBookmarks();
+}
+
+function isBookmarked(book, chapter, verse) {
+  return bookmarks.some(b => 
+    b.book === book && b.chapter === parseInt(chapter) && b.verse === parseInt(verse)
+  );
+}
+
+function updateBookmarksDisplay() {
+  if (bookmarks.length === 0) {
+    bookmarksList.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Немає закладок</div>';
+    return;
+  }
+
+  const html = bookmarks.map(bookmark => `
+    <div class="bookmark-item" onclick="navigateToBookmark('${bookmark.book}', ${bookmark.chapter}, ${bookmark.verse})">
+      <div>
+        <div class="bookmark-ref">${bookmark.fullRef}</div>
+        <div class="bookmark-text">${bookmark.text}</div>
+      </div>
+      <div class="bookmark-delete" onclick="event.stopPropagation(); deleteBookmark(${bookmark.id})" title="Видалити">🗑️</div>
+    </div>
+  `).join('');
+  
+  bookmarksList.innerHTML = html;
+}
+
+function deleteBookmark(id) {
+  bookmarks = bookmarks.filter(b => b.id !== id);
+  saveBookmarks();
+}
+
+function clearAllBookmarks() {
+  if (confirm('Видалити всі закладки?')) {
+    bookmarks = [];
+    saveBookmarks();
+  }
+}
+
+async function navigateToBookmark(book, chapter, verse) {
+  // Находим номер книги
+  const books = await bible.getBooks();
+  const bookObj = books.find(b => b.name === book);
+  if (!bookObj) return;
+
+  // Устанавливаем селекторы
+  bookSelect.value = bookObj.number;
+  await bookSelect.dispatchEvent(new Event('change'));
+  
+  setTimeout(() => {
+    chapterSelect.value = chapter;
+    chapterSelect.dispatchEvent(new Event('change'));
+    
+    // Скрываем панель закладок
+    bookmarksPanel.classList.remove('show');
+    bookmarksToggle.classList.remove('active');
+  }, 100);
+}
+
+// === СОХРАНЕНИЕ НАСТРОЕК ТЕМЫ ===
+function loadTheme() {
+  try {
+    const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME);
+    isDarkTheme = savedTheme === 'dark';
+    document.body.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
+    themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+  } catch (e) {
+    console.error('Ошибка загрузки темы:', e);
+  }
+}
+
+function saveTheme() {
+  try {
+    localStorage.setItem(STORAGE_KEYS.THEME, isDarkTheme ? 'dark' : 'light');
+  } catch (e) {
+    console.error('Ошибка сохранения темы:', e);
+  }
+}
+
+function toggleTheme() {
+  isDarkTheme = !isDarkTheme;
+  document.body.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
+  themeToggle.textContent = isDarkTheme ? '☀️' : '🌙';
+  saveTheme();
+}
+
+// === РЕЖИМ ЧТЕНИЯ ===
+function toggleReadingMode() {
+  isReadingMode = !isReadingMode;
+  document.body.classList.toggle('reading-mode', isReadingMode);
+  readingModeExit.classList.toggle('hidden', !isReadingMode);
+  readingModeToggle.classList.toggle('active', isReadingMode);
+  
+  if (isReadingMode && !chapterDisplay.innerHTML) {
+    setStatus('Выберите главу для режима чтения');
+  }
+}
+
+function exitReadingMode() {
+  isReadingMode = false;
+  document.body.classList.remove('reading-mode');
+  readingModeExit.classList.add('hidden');
+  readingModeToggle.classList.remove('active');
+}
+
+// === ОБНОВЛЕННОЕ ФОРМАТИРОВАНИЕ ГЛАВ ===
+async function formatChapterVerses(bookNum, chapterNum) {
+  try {
+    const verses = await bible.getVerses(bookNum, chapterNum);
+    if (!verses || !verses.length) return '<div class="verse">Глава пуста</div>';
+    
+    const books = await bible.getBooks();
+    const book = books.find(b => b.number === bookNum);
+    const bookName = book ? book.name : 'Неизвестная книга';
+    
+    let html = '';
+    verses.forEach(verse => {
+      const bookmarked = isBookmarked(bookName, chapterNum, verse.number);
+      html += `
+        <div class="verse">
+          <span class="verse-num">${verse.number}</span>
+          <span class="verse-text">${verse.text}</span>
+          <div class="verse-bookmark bookmark-btn ${bookmarked ? 'bookmarked' : ''}" 
+               onclick="toggleVerseBookmark('${bookName}', ${chapterNum}, ${verse.number}, '${verse.text.replace(/'/g, "\\'")}')">
+            ${bookmarked ? '★' : '☆'}
+          </div>
+        </div>
+      `;
+    });
+    return html;
+  } catch (e) {
+    console.error(e);
+    return '<div class="verse">Помилка завантаження</div>';
+  }
+}
+
+function toggleVerseBookmark(book, chapter, verse, text) {
+  if (isBookmarked(book, chapter, verse)) {
+    removeBookmark(book, chapter, verse);
+  } else {
+    addBookmark(book, chapter, verse, text);
+  }
+  
+  // Перерисовываем главу для обновления иконок закладок
+  showChapter(currentBook, currentChapter);
+}
+
+// === ОБНОВЛЕННЫЕ РЕЗУЛЬТАТЫ ПОИСКА ===
+async function showSearchResults() {
+  const q = qEl.value.trim();
+  resultsEl.innerHTML = '';
+  if (!q) { setStatus('Введіть запит для пошуку.'); return; }
+  
+  setStatus('Шукаємо...');
+  try {
+    await bible.ready();
+    const items = await bible.search(q);
+    
+    if (!items || !items.length) { 
+      setStatus('Нічого не знайдено.'); 
+      return; 
+    }
+    
+    setStatus(`Знайдено ${items.length} збігів`);
+    
+    const regex = new RegExp(`(${q})`, 'gi');
+
+    const frag = document.createDocumentFragment();
+    for (let it of items) {
+      const wrap = document.createElement('div'); 
+      wrap.className = 'res';
+      
+      const ref = document.createElement('div'); 
+      ref.className = 'ref';
+      
+      const refText = document.createElement('span');
+      refText.textContent = `${it.book} ${it.chapter}:${it.verse}`;
+      
+      const bookmarkBtn = document.createElement('span');
+      bookmarkBtn.className = `bookmark-btn ${isBookmarked(it.book, it.chapter, it.verse) ? 'bookmarked' : ''}`;
+      bookmarkBtn.textContent = isBookmarked(it.book, it.chapter, it.verse) ? '★' : '☆';
+      bookmarkBtn.onclick = () => {
+        if (isBookmarked(it.book, it.chapter, it.verse)) {
+          removeBookmark(it.book, it.chapter, it.verse);
+        } else {
+          addBookmark(it.book, it.chapter, it.verse, it.text);
+        }
+        bookmarkBtn.textContent = isBookmarked(it.book, it.chapter, it.verse) ? '★' : '☆';
+        bookmarkBtn.className = `bookmark-btn ${isBookmarked(it.book, it.chapter, it.verse) ? 'bookmarked' : ''}`;
+      };
+      
+      ref.appendChild(refText);
+      ref.appendChild(bookmarkBtn);
+      
+      const txt = document.createElement('div'); 
+      txt.className = 'text'; 
+      txt.innerHTML = it.text.replace(regex, `<mark style="background-color: yellow;">$1</mark>`);
+      
+      wrap.appendChild(ref); 
+      wrap.appendChild(txt);
+      frag.appendChild(wrap);
+    }
+    
+    resultsEl.appendChild(frag);
+    resultsEl.classList.remove('hidden');
+    navigationEl.classList.add('hidden');
+    backBtn.classList.remove('hidden');
+    qEl.blur();
+  } catch (e) {
+    console.error(e);
+    setStatus('Помилка: ' + (e?.message || String(e)));
+  }
+}
+
+function showNavigation() {
+  resultsEl.classList.add('hidden');
+  navigationEl.classList.remove('hidden');
+  backBtn.classList.add('hidden');
+  setStatus('Готово. Можна шукати або обрати книгу.');
+  qEl.value = '';
+  qEl.focus();
+}
+
+async function updateChapterNavigation() {
+  if (!currentBook || !currentChapter) return;
+  
+  const book = (await bible.getBooks()).find(b => b.number === currentBook);
+  currentChapterTitle.textContent = `${book.name} ${currentChapter}`;
+  
+  prevChapterBtn.disabled = currentChapter <= 1;
+  nextChapterBtn.disabled = currentChapter >= maxChapters;
+}
+
+async function showChapter(bookNum, chapterNum) {
+  if (!bookNum || !chapterNum) {
+    chapterDisplay.innerHTML = '';
+    chapterNav.classList.add('hidden');
+    return;
+  }
+  
+  try {
+    setStatus('Завантаження глави...');
+    currentBook = bookNum;
+    currentChapter = parseInt(chapterNum, 10);
+    
+    const chapters = await bible.getChapters(bookNum);
+    maxChapters = chapters.length;
+    
+    const versesHtml = await formatChapterVerses(bookNum, chapterNum);
+    chapterDisplay.innerHTML = versesHtml;
+    
+    chapterNav.classList.remove('hidden');
+    await updateChapterNavigation();
+    
+    setStatus(`Завантажено: ${currentChapterTitle.textContent}`);
+    
+    chapterDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    console.error(e);
+    chapterDisplay.innerHTML = '<div class="verse">Помилка завантаження глави</div>';
+    setStatus('Помилка завантаження');
+  }
+}
+
+async function navigateToPrevChapter() {
+  if (currentChapter > 1) {
+    const newChapter = currentChapter - 1;
+    chapterSelect.value = newChapter;
+    await showChapter(currentBook, newChapter);
+  }
+}
+
+async function navigateToNextChapter() {
+  if (currentChapter < maxChapters) {
+    const newChapter = currentChapter + 1;
+    chapterSelect.value = newChapter;
+    await showChapter(currentBook, newChapter);
+  }
+}
+
+// === EVENT LISTENERS ===
+searchBtn.addEventListener('click', showSearchResults);
+backBtn.addEventListener('click', showNavigation);
+prevChapterBtn.addEventListener('click', navigateToPrevChapter);
+nextChapterBtn.addEventListener('click', navigateToNextChapter);
+themeToggle.addEventListener('click', toggleTheme);
+readingModeToggle.addEventListener('click', toggleReadingMode);
+readingModeExit.addEventListener('click', exitReadingMode);
+clearBookmarks.addEventListener('click', clearAllBookmarks);
+
+bookmarksToggle.addEventListener('click', () => {
+  bookmarksPanel.classList.toggle('show');
+  bookmarksToggle.classList.toggle('active');
+  updateBookmarksDisplay();
+});
+
+qEl.addEventListener('keydown', e => { 
+  if (e.key === 'Enter') showSearchResults(); 
+});
+
+// === ИНИЦИАЛИЗАЦИЯ ===
+async function initBooks() {
+  try {
+    setStatus('Завантаження списку книг...');
+    await bible.ready();
+    setStatus('Готово. Можна шукати або обрати книгу.');
+
+    const books = await bible.getBooks();
+    bookSelect.innerHTML = '<option value="">Оберіть книгу</option>';
+    books.forEach((b) => {
+      const opt = document.createElement('option');
+      opt.value = b.number;
+      opt.textContent = b.name;
+      bookSelect.appendChild(opt);
+    });
+  } catch (err) {
+    console.error(err);
+    setStatus('Не вдалося завантажити: ' + (err?.message || String(err)));
+  }
+}
+
+bookSelect.addEventListener('change', async () => {
+  chapterSelect.innerHTML = '<option value="">Глава</option>';
+  chapterDisplay.innerHTML = '';
+  chapterNav.classList.add('hidden');
+  
+  const bookNum = bookSelect.value;
+  if (!bookNum) return;
+  
+  try {
+    setStatus('Завантаження списку глав...');
+    const chapters = await bible.getChapters(bookNum);
+    chapters.forEach((ch) => {
+      const opt = document.createElement('option');
+      opt.value = ch;
+      opt.textContent = `Глава ${ch}`;
+      chapterSelect.appendChild(opt);
+    });
+    setStatus('Оберіть главу');
+  } catch (e) {
+    console.error(e);
+    setStatus('Помилка завантаження глав');
+  }
+});
+
+chapterSelect.addEventListener('change', async () => {
+  await showChapter(bookSelect.value, chapterSelect.value);
+});
+
+// Глобальные функции для onclick в HTML
+window.toggleVerseBookmark = toggleVerseBookmark;
+window.navigateToBookmark = navigateToBookmark;
+window.deleteBookmark = deleteBookmark;
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', () => {
+  // Загружаем сохраненные настройки
+  loadBookmarks();
+  loadTheme();
+  
+  initBooks();
+  updateBookmarksDisplay();
+  
+  // Фокус на поле поиска для мобильных устройств
+  setTimeout(() => qEl.focus(), 300);
+});
+
+// Горячие клавиши
+document.addEventListener('keydown', (e) => {
+  // Ctrl/Cmd + D для переключения темы
+  if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+    e.preventDefault();
+    toggleTheme();
+  }
+  
+  // Ctrl/Cmd + R для режима чтения
+  if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+    e.preventDefault();
+    toggleReadingMode();
+  }
+  
+  // Ctrl/Cmd + B для закладок
+  if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+    e.preventDefault();
+    bookmarksPanel.classList.toggle('show');
+    bookmarksToggle.classList.toggle('active');
+    updateBookmarksDisplay();
+  }
+  
+  // Escape для выхода из режима чтения
+  if (e.key === 'Escape' && isReadingMode) {
+    exitReadingMode();
+  }
+  
+  // Стрелки для навигации по главам в режиме чтения
+  if (isReadingMode) {
+    if (e.key === 'ArrowLeft' && !prevChapterBtn.disabled) {
+      navigateToPrevChapter();
+    }
+    if (e.key === 'ArrowRight' && !nextChapterBtn.disabled) {
+      navigateToNextChapter();
+    }
+  }
+});
+
+// Предотвращение закрытия панели закладок при клике внутри неё
+bookmarksPanel.addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
+// Закрытие панели закладок при клике вне её
+document.addEventListener('click', (e) => {
+  if (!bookmarksToggle.contains(e.target) && !bookmarksPanel.contains(e.target)) {
+    bookmarksPanel.classList.remove('show');
+    bookmarksToggle.classList.remove('active');
+  }
+});
+    </script>
+</body>
+</html>
