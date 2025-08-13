@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="uk">
 <head>
   <meta charset="utf-8" />
@@ -417,8 +417,76 @@
     .reading-mode-exit:hover {
       transform: scale(1.1);
     }
-    
+  
+/* Дополнительные стили для интерактивных результатов поиска */
+.clickable-verse {
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  position: relative;
+}
+
+.clickable-verse:hover {
+  background-color: var(--hover-color) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.clickable-verse::after {
+  content: "👆 Клікніть для переходу";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.7rem;
+  color: var(--secondary-color);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.clickable-verse:hover::after {
+  opacity: 1;
+}
+
+/* Анимация для подсветки найденного стиха */
+@keyframes highlightVerse {
+  0% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+  50% {
+    background-color: var(--secondary-color);
+    color: white;
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+.verse.highlighted {
+  animation: highlightVerse 2s ease-in-out;
+}
+
+/* Улучшенный стиль для ссылок на стихи в результатах поиска */
+.ref span:first-child {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.clickable-verse .ref span:first-child:hover {
+  text-decoration: underline;
+  color: var(--primary-color);
+}
+
+/* Адаптивные стили */
     @media (max-width: 600px) {
+      
+  .clickable-verse::after {
+    font-size: 0.6rem;
+    right: 4px;
+    top: 4px;
+  }
+
       body {
         padding: 8px;
       }
@@ -774,6 +842,66 @@ function toggleVerseBookmark(book, chapter, verse, text) {
   showChapter(currentBook, currentChapter);
 }
 
+// === ФУНКЦИЯ ПЕРЕХОДА К СТИХУ ===
+async function navigateToVerse(bookName, chapter, verse) {
+  try {
+    setStatus('Переход к стиху...');
+    
+    // Находим номер книги
+    const books = await bible.getBooks();
+    const bookObj = books.find(b => b.name === bookName);
+    if (!bookObj) {
+      setStatus('Книга не найдена');
+      return;
+    }
+
+    // Устанавливаем селекторы
+    bookSelect.value = bookObj.number;
+    
+    // Загружаем главы для выбранной книги
+    chapterSelect.innerHTML = '<option value="">Глава</option>';
+    const chapters = await bible.getChapters(bookObj.number);
+    chapters.forEach((ch) => {
+      const opt = document.createElement('option');
+      opt.value = ch;
+      opt.textContent = `Глава ${ch}`;
+      chapterSelect.appendChild(opt);
+    });
+    
+    // Устанавливаем главу
+    chapterSelect.value = chapter;
+    
+    // Показываем навигацию и загружаем главу
+    showNavigation();
+    await showChapter(bookObj.number, chapter);
+    
+    // Прокручиваем к конкретному стиху через небольшую задержку
+    setTimeout(() => {
+      const verseElement = document.querySelector(`.verse:nth-child(${verse})`);
+      if (verseElement) {
+        verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Подсвечиваем стих на короткое время
+        verseElement.style.backgroundColor = 'var(--secondary-color)';
+        verseElement.style.color = 'white';
+        verseElement.style.borderRadius = '8px';
+        verseElement.style.padding = '8px';
+        verseElement.style.transition = 'all 0.3s';
+        
+        setTimeout(() => {
+          verseElement.style.backgroundColor = '';
+          verseElement.style.color = '';
+          verseElement.style.borderRadius = '';
+          verseElement.style.padding = '';
+        }, 2000);
+      }
+    }, 500);
+    
+  } catch (e) {
+    console.error('Ошибка перехода к стиху:', e);
+    setStatus('Помилка переходу до віршу');
+  }
+}
+
 // === ОБНОВЛЕННЫЕ РЕЗУЛЬТАТЫ ПОИСКА ===
 async function showSearchResults() {
   const q = qEl.value.trim();
@@ -797,18 +925,23 @@ async function showSearchResults() {
     const frag = document.createDocumentFragment();
     for (let it of items) {
       const wrap = document.createElement('div'); 
-      wrap.className = 'res';
+      wrap.className = 'res clickable-verse';
+      wrap.style.cursor = 'pointer';
+      wrap.title = 'Клікніть для переходу до глави';
       
       const ref = document.createElement('div'); 
       ref.className = 'ref';
       
       const refText = document.createElement('span');
       refText.textContent = `${it.book} ${it.chapter}:${it.verse}`;
+      refText.style.color = 'var(--secondary-color)';
+      refText.style.fontWeight = 'bold';
       
       const bookmarkBtn = document.createElement('span');
       bookmarkBtn.className = `bookmark-btn ${isBookmarked(it.book, it.chapter, it.verse) ? 'bookmarked' : ''}`;
       bookmarkBtn.textContent = isBookmarked(it.book, it.chapter, it.verse) ? '★' : '☆';
-      bookmarkBtn.onclick = () => {
+      bookmarkBtn.onclick = (e) => {
+        e.stopPropagation(); // Предотвращаем переход при клике на закладку
         if (isBookmarked(it.book, it.chapter, it.verse)) {
           removeBookmark(it.book, it.chapter, it.verse);
         } else {
@@ -824,6 +957,20 @@ async function showSearchResults() {
       const txt = document.createElement('div'); 
       txt.className = 'text'; 
       txt.innerHTML = it.text.replace(regex, `<mark style="background-color: yellow;">$1</mark>`);
+      
+      // Добавляем обработчик клика для всего результата
+      wrap.onclick = () => {
+        navigateToVerse(it.book, it.chapter, it.verse);
+      };
+      
+      // Добавляем эффект наведения
+      wrap.addEventListener('mouseenter', () => {
+        wrap.style.backgroundColor = 'var(--hover-color)';
+      });
+      
+      wrap.addEventListener('mouseleave', () => {
+        wrap.style.backgroundColor = '';
+      });
       
       wrap.appendChild(ref); 
       wrap.appendChild(txt);
@@ -980,6 +1127,7 @@ chapterSelect.addEventListener('change', async () => {
 window.toggleVerseBookmark = toggleVerseBookmark;
 window.navigateToBookmark = navigateToBookmark;
 window.deleteBookmark = deleteBookmark;
+window.navigateToVerse = navigateToVerse;
 
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', () => {
